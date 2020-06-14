@@ -191,6 +191,20 @@ fi
 	}
 }
 
+func createContainerPort(name string, port int32, hostNetwork bool) corev1.ContainerPort {
+	var containerPort = corev1.ContainerPort{
+		Name:          name,
+		ContainerPort: port,
+		Protocol:      corev1.ProtocolTCP,
+	}
+
+	if hostNetwork {
+		containerPort.HostPort = port
+	}
+
+	return containerPort
+}
+
 func generateRedisStatefulSet(rc *redisv1beta1.RedisCluster, labels map[string]string,
 	ownerRefs []metav1.OwnerReference) *appsv1.StatefulSet {
 	name := util.GetRedisName(rc)
@@ -242,11 +256,7 @@ func generateRedisStatefulSet(rc *redisv1beta1.RedisCluster, labels map[string]s
 							Image:           rc.Spec.Image,
 							ImagePullPolicy: pullPolicy(rc.Spec.ImagePullPolicy),
 							Ports: []corev1.ContainerPort{
-								{
-									Name:          "redis",
-									ContainerPort: 6379,
-									Protocol:      corev1.ProtocolTCP,
-								},
+								createContainerPort("redis", 6379, spec.HostNetwork),
 							},
 							VolumeMounts: volumeMounts,
 							Command:      redisCommand,
@@ -287,6 +297,7 @@ func generateRedisStatefulSet(rc *redisv1beta1.RedisCluster, labels map[string]s
 						},
 					},
 					Volumes: volumes,
+					HostNetwork: spec.HostNetwork,
 				},
 			},
 		},
@@ -381,11 +392,7 @@ func generateSentinelStatefulSet(rc *redisv1beta1.RedisCluster, labels map[strin
 							Image:           rc.Spec.Sentinel.Image,
 							ImagePullPolicy: pullPolicy(rc.Spec.Sentinel.ImagePullPolicy),
 							Ports: []corev1.ContainerPort{
-								{
-									Name:          "sentinel",
-									ContainerPort: 26379,
-									Protocol:      corev1.ProtocolTCP,
-								},
+								createContainerPort("sentinel", 26379, spec.HostNetwork),
 							},
 							VolumeMounts: []corev1.VolumeMount{
 								{

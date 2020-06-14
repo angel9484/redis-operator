@@ -28,6 +28,7 @@ type RedisClusterSpec struct {
 	Config             map[string]string             `json:"config,omitempty"`
 	Annotations        map[string]string             `json:"annotations,omitempty"`
 	DisablePersistence bool                          `json:"disablePersistence,omitempty"`
+	HostNetwork         bool                          `json:"hostNetwork,omitempty"`
 
 	// Sentinel defines its cluster settings
 	Sentinel SentinelSettings `json:"sentinel,omitempty"`
